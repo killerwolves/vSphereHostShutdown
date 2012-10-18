@@ -1,0 +1,58 @@
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
+
+#Visual Studio files
+*.[Oo]bj
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+ipch/
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
+
+TSV.IDM.Data/obj/
+TSV.IDM.Data/bin/
+TSV.IDM.IdentityProviders.Google/bin/
+TSV.IDM.Data/bin/Debug/
+TSV.IDM.Management/bin/
+TSV.IDM.Management/obj/
+TSV.IDM.suo
+TSV.IDM.Plugins/obj/
+TSV.IDM.Plugins/bin/
+
+
+#Tooling
+_ReSharper*/
+*.resharper
+[Tt]est[Rr]esult*
+
+#Project files
+[Bb]uild/
+
+#Subversion files
+.svn
+
+# Office Temp Files
+~$*
+
+# Licensed Components
+Dependencies/ComponentSpace.SAML2/Full/
