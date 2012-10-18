@@ -1,5 +1,0 @@
-D:\Users\klightspeed\Documents\Visual Studio 2010\Projects\vSphereHostShutdown\vSphereHostShutdown\bin\Debug\vSphereHostShutdown.exe
-D:\Users\klightspeed\Documents\Visual Studio 2010\Projects\vSphereHostShutdown\vSphereHostShutdown\bin\Debug\vSphereHostShutdown.pdb
-D:\Users\klightspeed\Documents\Visual Studio 2010\Projects\vSphereHostShutdown\vSphereHostShutdown\obj\x86\Debug\ResolveAssemblyReference.cache
-D:\Users\klightspeed\Documents\Visual Studio 2010\Projects\vSphereHostShutdown\vSphereHostShutdown\obj\x86\Debug\vSphereHostShutdown.exe
-D:\Users\klightspeed\Documents\Visual Studio 2010\Projects\vSphereHostShutdown\vSphereHostShutdown\obj\x86\Debug\vSphereHostShutdown.pdb
