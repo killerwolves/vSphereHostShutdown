@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("vSphereHostShutdown")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("Townsville Catholic Education Office")]
 [assembly: AssemblyProduct("vSphereHostShutdown")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
+[assembly: AssemblyCopyright("Copyright © 2013 Townsville Catholic Education Office")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
