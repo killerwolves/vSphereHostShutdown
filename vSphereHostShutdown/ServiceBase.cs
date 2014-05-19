@@ -40,13 +40,12 @@ namespace vSphereHostShutdown
             }
         }
 
-        public void Install(string[] args)
+        public void Install()
         {
             using (var servicemanager = NativeServiceManager.Open())
             {
                 using (var service = servicemanager.CreateService(this.ServiceName, this.ServiceName, "\"" + Assembly.GetExecutingAssembly().Location + "\" -service", ServiceRights.AllAccess, StartType))
                 {
-                    service.Start(args);
                 }
             }
         }
@@ -87,7 +86,7 @@ namespace vSphereHostShutdown
             {
                 if ("-install".StartsWith(args[0]))
                 {
-                    Install(new string[] { });
+                    Install();
                     return 0;
                 }
                 else if ("-uninstall".StartsWith(args[0]))
