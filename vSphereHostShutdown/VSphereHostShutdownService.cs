@@ -14,29 +14,52 @@ using System.Reflection;
 
 namespace vSphereHostShutdown
 {
+    public class VSphereServerSection : ConfigurationSection
+    {
+        [ConfigurationProperty("servers")]
+        public VSphereServerCollection Servers { get { return (VSphereServerCollection)base["servers"]; } set { base["printers"] = value; } }
+    }
+
+    [ConfigurationCollection(typeof(VSphereServerElement))]
+    public class VSphereServerCollection : ConfigurationElementCollection
+    {
+        public override ConfigurationElementCollectionType CollectionType { get { return ConfigurationElementCollectionType.BasicMapAlternate; } }
+
+        protected override string ElementName { get { return "server"; } }
+        protected override bool IsElementName(string elementName) { return elementName == ElementName; }
+        public override bool IsReadOnly() { return false; }
+        protected override ConfigurationElement CreateNewElement() { return new VSphereServerElement(); }
+        protected override object GetElementKey(ConfigurationElement element) { return ((VSphereServerElement)element).Name; }
+        public VSphereServerElement this[int idx] { get { return (VSphereServerElement)base.BaseGet(idx); } }
+    }
+
+    public class VSphereServerElement : ConfigurationElement
+    {
+        [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
+        public string Name { get { return (string)base["name"]; } set { base["name"] = value; } }
+
+        [ConfigurationProperty("host", IsRequired = true)]
+        public string Host { get { return (string)base["host"]; } set { base["host"] = value; } }
+
+        [ConfigurationProperty("username", IsRequired = true)]
+        public string Username { get { return (string)base["username"]; } set { base["username"] = value; } }
+
+        [ConfigurationProperty("password", IsRequired = true)]
+        public string Password { get { return (string)base["password"]; } set { base["password"] = value; } }
+    }
+
+    public class VSphereServer
+    {
+        public string Name { get; set; }
+        public string Host { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
     [DesignerCategory("Code")]
     public class VSphereHostShutdownService : ServiceBase
     {
         protected string LogFile;
-
-        protected void WriteLogEntry(string message, EventLogEntryType type)
-        {
-            File.AppendAllLines(LogFile, new string[] { message });
-
-            try
-            {
-                if (!EventLog.SourceExists("vSphereHostShutdown"))
-                {
-                    EventLog.CreateEventSource("vSphereHostShutdown", "application");
-                }
-
-                EventLog.WriteEntry("vSphereHostShutdown", message, type);
-            }
-            catch
-            {
-                Console.WriteLine("Unable to write to event log");
-            }
-        }
 
         public string Server;
         public string Username;
@@ -52,33 +75,55 @@ namespace vSphereHostShutdown
             LogFile = Assembly.GetExecutingAssembly().Location + ".log";
         }
 
+        protected IEnumerable<VSphereServer> GetServers()
+        {
+            var Section = ((VSphereServerSection)ConfigurationManager.GetSection("serverConfiguration"));
+            var ServerCollection = Section.Servers;
+            var ServerElements = ServerCollection.OfType<VSphereServerElement>();
+            return ServerElements.Select(s => new VSphereServer { Name = s.Name, Host = s.Host, Username = s.Username, Password = s.Password });
+        }
+
         protected override void OnStart(string[] args)
         {
-            WriteLogEntry("Starting vSphereHostShutdown Service", EventLogEntryType.Information);
+            Logger.WriteLogEntry("Starting vSphereHostShutdown Service", EventLogEntryType.Information);
         }
 
         protected override void OnStop()
         {
-            WriteLogEntry("Stopping vSphereHostShutdown Service", EventLogEntryType.Information);
+            Logger.WriteLogEntry("Stopping vSphereHostShutdown Service", EventLogEntryType.Information);
         }
 
         protected override void OnPreShutdown()
         {
-            WriteLogEntry("Shutdown in vSphereHostShutdown Service", EventLogEntryType.Information);
+            Logger.WriteLogEntry("Shutdown in vSphereHostShutdown Service", EventLogEntryType.Information);
             RunStandalone();
         }
 
         public override void RunStandalone(params string[] args)
         {
-            WriteLogEntry("Initiating host shutdown", EventLogEntryType.Information);
+            Logger.WriteLogEntry("Initiating host shutdown", EventLogEntryType.Information);
 
+            if (Server != null && Username != null && Password != null)
+            {
+                ShutdownHost(new VSphereServer { Name = Server, Host = Server, Username = Username, Password = Password });
+            }
+            else
+            {
+                foreach (VSphereServer server in GetServers())
+                {
+                    ShutdownHost(server);
+                }
+            }
+        }
+
+        protected void ShutdownHost(VSphereServer server)
+        {
             try
             {
-                Vim25Client client = new Vim25Client(Server, Username, Password);
+                Vim25Client client = new Vim25Client(server.Host, server.Username, server.Password);
                 client.LogUserEvent("HostSystem", "ha-host", "Shutdown Test");
                 client.ShutdownHost_Task(true);
-                Console.WriteLine("Shutdown initiated");
-                WriteLogEntry("Host shutdown initiated", EventLogEntryType.Information);
+                Logger.WriteLogEntry(String.Format("Host {0} shutdown initiated", server.Name), EventLogEntryType.Information);
             }
             catch (WebException ex)
             {
@@ -89,20 +134,20 @@ namespace vSphereHostShutdown
                     {
                         string xml = new System.IO.StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
                         Console.Write(xml);
-                        WriteLogEntry("Host shutdown failed\n\nReturned XML:\n" + xml, EventLogEntryType.Error);
+                        Logger.WriteLogEntry(String.Format("Host {0} shutdown failed\n\nReturned XML:\n{1}", server.Name, xml), EventLogEntryType.Error);
                         return;
                     }
                 }
                 else
                 {
-                    WriteLogEntry("HTTP Exception caught attempting host shutdown\n\nException details:\n" + ex.ToString(), EventLogEntryType.Error);
+                    Logger.WriteLogEntry("HTTP Exception caught attempting host shutdown\n\nException details:\n" + ex.ToString(), EventLogEntryType.Error);
                 }
                 Console.Write(ex.ToString());
             }
             catch (Exception ex)
             {
                 Console.Write(ex.ToString());
-                WriteLogEntry("Exception caught attempting host shutdown\n\nException details:\n" + ex.ToString(), EventLogEntryType.Error);
+                Logger.WriteLogEntry("Exception caught attempting host shutdown\n\nException details:\n" + ex.ToString(), EventLogEntryType.Error);
             }
         }
     }
