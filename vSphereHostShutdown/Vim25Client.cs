@@ -42,6 +42,7 @@ namespace vSphereHostShutdown
             this.server = server;
             this.reqid = 0;
             this.client = new CookieAwareWebClient();
+            this.client.Proxy = null;
             this.client.Headers.Add("User-Agent: TCEO vSphere Host Shutdown");
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
             try
